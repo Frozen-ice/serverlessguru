@@ -1,12 +1,8 @@
 // Simple authentication service for demo purposes
 // In production, you would use AWS Cognito
 
-// Mock user database for demo
-const mockUsers = [
-  { email: "admin@example.com", password: "admin123", name: "Admin User" },
-  { email: "user@example.com", password: "user123", name: "Regular User" },
-  { email: "demo@example.com", password: "demo123", name: "Demo User" }
-];
+// Mock user database for demo - starts empty
+const mockUsers: Array<{email: string, password: string, name: string}> = [];
 
 export const authService = {
   // Sign up a new user

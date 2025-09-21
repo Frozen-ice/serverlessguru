@@ -225,15 +225,6 @@ const AuthPage: React.FC = () => {
               </Button>
             </Box>
             
-            {/* Demo credentials info */}
-            <Box sx={{ mt: 2, p: 2, bgcolor: "grey.100", borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary" align="center">
-                <strong>Demo Credentials:</strong><br />
-                Email: admin@example.com | Password: admin123<br />
-                Email: user@example.com | Password: user123<br />
-                Email: demo@example.com | Password: demo123
-              </Typography>
-            </Box>
           </TabPanel>
 
           <TabPanel value={tabValue} index={1}>
