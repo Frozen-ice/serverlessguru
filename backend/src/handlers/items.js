@@ -2,10 +2,10 @@ const { success, error } = require("../utils/response");
 const { createItem } = require("../utils/dynamodb");
 const Item = require("../models/Item");
 
-module.exports.create = async (event) => {
+module.exports.createItem = async (event) => {
   try {
     const body = JSON.parse(event.body);
-    const userId = event.requestContext.authorizer.claims.sub;
+    const userId = "demo-user";
     
     const itemData = {
       ...body,
@@ -29,12 +29,12 @@ module.exports.create = async (event) => {
 };
 
 
-module.exports.list = async (event) => {
+module.exports.getItems = async (event) => {
   try {
-    const userId = event.requestContext.authorizer.claims.sub;
-    const { getItemsByUser } = require("../utils/dynamodb");
+    const userId = "demo-user";
+    const { getAllItems } = require("../utils/dynamodb");
     
-    const items = await getItemsByUser(userId);
+    const items = await getAllItems();
     
     return success(items);
   } catch (err) {
@@ -43,10 +43,10 @@ module.exports.list = async (event) => {
   }
 };
 
-module.exports.get = async (event) => {
+module.exports.getItem = async (event) => {
   try {
     const { id } = event.pathParameters;
-    const userId = event.requestContext.authorizer.claims.sub;
+    const userId = "demo-user";
     const { getItem } = require("../utils/dynamodb");
     
     const item = await getItem(id);
@@ -66,11 +66,11 @@ module.exports.get = async (event) => {
   }
 };
 
-module.exports.update = async (event) => {
+module.exports.updateItem = async (event) => {
   try {
     const { id } = event.pathParameters;
     const body = JSON.parse(event.body);
-    const userId = event.requestContext.authorizer.claims.sub;
+    const userId = "demo-user";
     const { getItem, updateItem } = require("../utils/dynamodb");
     
     // Check if item exists and belongs to user
@@ -92,10 +92,10 @@ module.exports.update = async (event) => {
   }
 };
 
-module.exports.delete = async (event) => {
+module.exports.deleteItem = async (event) => {
   try {
     const { id } = event.pathParameters;
-    const userId = event.requestContext.authorizer.claims.sub;
+    const userId = "demo-user";
     const { getItem, deleteItem } = require("../utils/dynamodb");
     
     // Check if item exists and belongs to user

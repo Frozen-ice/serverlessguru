@@ -1,18 +1,20 @@
 service: serverless-guru-api
 
+# Serverless Dashboard Configuration
+org: hoanglyassessment
+app: serverless-guru-api
+
 frameworkVersion: '4'
 
 provider:
   name: aws
   runtime: nodejs18.x
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
+  region: ${opt:region, 'us-east-2'}
   environment:
     STAGE: ${self:provider.stage}
     REGION: ${self:provider.region}
     ITEMS_TABLE: ${self:service}-items-${self:provider.stage}
-    USER_POOL_ID: ${cf:${self:service}-cognito-${self:provider.stage}.UserPoolId}
-    USER_POOL_CLIENT_ID: ${cf:${self:service}-cognito-${self:provider.stage}.UserPoolClientId}
   iam:
     role:
       statements:
@@ -27,81 +29,50 @@ provider:
           Resource:
             - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ITEMS_TABLE}"
             - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ITEMS_TABLE}/index/*"
-        - Effect: Allow
-          Action:
-            - cognito-idp:AdminGetUser
-            - cognito-idp:AdminListGroupsForUser
-          Resource:
-            - "arn:aws:cognito-idp:${self:provider.region}:*:userpool/${self:provider.environment.USER_POOL_ID}"
 
 plugins:
   - serverless-offline
 
-custom:
-  serverless-offline:
-    httpPort: 3000
-    host: 0.0.0.0
-
 functions:
   createItem:
-    handler: src/handlers/items.create
+    handler: src/handlers/items.createItem
     events:
       - http:
-          path: /api/items
+          path: api/items
           method: post
           cors: true
-          authorizer:
-            name: CognitoAuthorizer
-            type: COGNITO_USER_POOLS
-            arn: ${cf:${self:service}-cognito-${self:provider.stage}.UserPoolArn}
 
   getItems:
-    handler: src/handlers/items.list
+    handler: src/handlers/items.getItems
     events:
       - http:
-          path: /api/items
+          path: api/items
           method: get
           cors: true
-          authorizer:
-            name: CognitoAuthorizer
-            type: COGNITO_USER_POOLS
-            arn: ${cf:${self:service}-cognito-${self:provider.stage}.UserPoolArn}
 
   getItem:
-    handler: src/handlers/items.get
+    handler: src/handlers/items.getItem
     events:
       - http:
-          path: /api/items/{id}
+          path: api/items/{id}
           method: get
           cors: true
-          authorizer:
-            name: CognitoAuthorizer
-            type: COGNITO_USER_POOLS
-            arn: ${cf:${self:service}-cognito-${self:provider.stage}.UserPoolArn}
 
   updateItem:
-    handler: src/handlers/items.update
+    handler: src/handlers/items.updateItem
     events:
       - http:
-          path: /api/items/{id}
+          path: api/items/{id}
           method: put
           cors: true
-          authorizer:
-            name: CognitoAuthorizer
-            type: COGNITO_USER_POOLS
-            arn: ${cf:${self:service}-cognito-${self:provider.stage}.UserPoolArn}
 
   deleteItem:
-    handler: src/handlers/items.delete
+    handler: src/handlers/items.deleteItem
     events:
       - http:
-          path: /api/items/{id}
+          path: api/items/{id}
           method: delete
           cors: true
-          authorizer:
-            name: CognitoAuthorizer
-            type: COGNITO_USER_POOLS
-            arn: ${cf:${self:service}-cognito-${self:provider.stage}.UserPoolArn}
 
 resources:
   Resources:
@@ -112,82 +83,29 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: userId
-            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        GlobalSecondaryIndexes:
-          - IndexName: UserIdIndex
-            KeySchema:
-              - AttributeName: userId
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
         BillingMode: PAY_PER_REQUEST
 
-    UserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UserPoolName: ${self:service}-user-pool-${self:provider.stage}
-        UsernameAttributes:
-          - email
-        AutoVerifiedAttributes:
-          - email
-        Policies:
-          PasswordPolicy:
-            MinimumLength: 8
-            RequireUppercase: true
-            RequireLowercase: true
-            RequireNumbers: true
-            RequireSymbols: true
-        Schema:
-          - Name: email
-            AttributeDataType: String
-            Required: true
-            Mutable: true
-          - Name: name
-            AttributeDataType: String
-            Required: true
-            Mutable: true
-
-    UserPoolClient:
-      Type: AWS::Cognito::UserPoolClient
-      Properties:
-        UserPoolId: !Ref UserPool
-        ClientName: ${self:service}-client-${self:provider.stage}
-        GenerateSecret: false
-        ExplicitAuthFlows:
-          - ALLOW_USER_SRP_AUTH
-          - ALLOW_REFRESH_TOKEN_AUTH
-        SupportedIdentityProviders:
-          - COGNITO
-
   Outputs:
-    UserPoolId:
-      Value: !Ref UserPool
-      Export:
-        Name: ${self:service}-cognito-${self:provider.stage}-UserPoolId
-
-    UserPoolArn:
-      Value: !GetAtt UserPool.Arn
-      Export:
-        Name: ${self:service}-cognito-${self:provider.stage}-UserPoolArn
-
-    UserPoolClientId:
-      Value: !Ref UserPoolClient
-      Export:
-        Name: ${self:service}-cognito-${self:provider.stage}-UserPoolClientId
-
     ApiGatewayRestApiId:
-      Value: !Ref ApiGatewayRestApi
+      Value:
+        Ref: ApiGatewayRestApi
       Export:
-        Name: ${self:service}-api-${self:provider.stage}
+        Name: ${self:service}-${self:provider.stage}-ApiGatewayRestApiId
 
-    ApiGatewayRestApiRootResourceId:
-      Value: !GetAtt ApiGatewayRestApi.RootResourceId
+    ItemsTableName:
+      Value:
+        Ref: ItemsTable
       Export:
-        Name: ${self:service}-api-root-${self:provider.stage}
+        Name: ${self:service}-${self:provider.stage}-ItemsTableName
+
+    ItemsTableArn:
+      Value:
+        Fn::GetAtt:
+          - ItemsTable
+          - Arn
+      Export:
+        Name: ${self:service}-${self:provider.stage}-ItemsTableArn
+

@@ -23,15 +23,6 @@ const getItem = async (id) => {
   return result.Item;
 };
 
-const getAllItems = async () => {
-  const params = {
-    TableName: ITEMS_TABLE
-  };
-  
-  const result = await dynamodb.scan(params).promise();
-  return result.Items || [];
-};
-
 const getItemsByUser = async (userId) => {
   const params = {
     TableName: ITEMS_TABLE,
@@ -43,6 +34,20 @@ const getItemsByUser = async (userId) => {
   
   const result = await dynamodb.scan(params).promise();
   return result.Items || [];
+};
+
+const getAllItems = async () => {
+  const params = {
+    TableName: ITEMS_TABLE,
+    IndexName: "UserIdIndex",
+    KeyConditionExpression: "userId = :userId",
+    ExpressionAttributeValues: {
+      ":userId": userId
+    }
+  };
+  
+  const result = await dynamodb.query(params).promise();
+  return result.Items;
 };
 
 const updateItem = async (id, updateData) => {
@@ -76,11 +81,20 @@ const deleteItem = async (id) => {
   return await dynamodb.delete(params).promise();
 };
 
+const getAllItems = async () => {
+  const params = {
+    TableName: ITEMS_TABLE
+  };
+  
+  const result = await dynamodb.scan(params).promise();
+  return result.Items || [];
+};
+
 module.exports = {
   createItem,
   getItem,
-  getAllItems,
   getItemsByUser,
+  getAllItems,
   updateItem,
   deleteItem
 };

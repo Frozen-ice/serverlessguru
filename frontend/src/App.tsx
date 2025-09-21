@@ -3,19 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Box } from "@mui/material";
-import { Amplify } from 'aws-amplify';
 import Dashboard from "./pages/Dashboard";
 import AuthPage from "./pages/AuthPage";
-
-// Configure Amplify
-Amplify.configure({
-  Auth: {
-    region: 'us-east-1',
-    userPoolId: process.env.REACT_APP_USER_POOL_ID || 'us-east-1_XXXXXXXXX',
-    userPoolWebClientId: process.env.REACT_APP_USER_POOL_CLIENT_ID || 'XXXXXXXXXXXXXXXXXXXXXXXXXX',
-    mandatorySignIn: true,
-  }
-});
 
 const theme = createTheme({
   palette: {
