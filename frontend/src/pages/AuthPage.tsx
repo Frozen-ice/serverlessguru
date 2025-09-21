@@ -12,6 +12,7 @@ import {
   Tab,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../services/auth";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,6 +40,7 @@ const AuthPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -50,6 +52,7 @@ const AuthPage: React.FC = () => {
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     setError(null);
+    setSuccess(null);
     setFormData({
       email: "",
       password: "",
@@ -71,6 +74,7 @@ const AuthPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -78,13 +82,32 @@ const AuthPage: React.FC = () => {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Simulate API call - replace with actual Cognito integration
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Mock successful signup
-      localStorage.setItem("cognito_token", "mock_token_" + Date.now());
-      navigate("/dashboard");
+      const result = await authService.signUp(
+        formData.email,
+        formData.password,
+        formData.name
+      );
+
+      if (result.success) {
+        setSuccess("Account created successfully! Please check your email to confirm your account.");
+        setFormData({
+          email: "",
+          password: "",
+          name: "",
+          confirmPassword: "",
+        });
+        // Switch to sign in tab
+        setTabValue(0);
+      } else {
+        setError(result.error || "Failed to create account. Please try again.");
+      }
     } catch (err) {
       setError("Failed to create account. Please try again.");
     } finally {
@@ -96,14 +119,21 @@ const AuthPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
-      // Simulate API call - replace with actual Cognito integration
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Mock successful signin
-      localStorage.setItem("cognito_token", "mock_token_" + Date.now());
-      navigate("/dashboard");
+      const result = await authService.signIn(formData.email, formData.password);
+
+      if (result.success) {
+        // Store the session token
+        const session = await authService.getCurrentSession();
+        if (session.success && session.data) {
+          localStorage.setItem("cognito_token", session.data.getIdToken().getJwtToken());
+        }
+        navigate("/dashboard");
+      } else {
+        setError(result.error || "Invalid email or password. Please try again.");
+      }
     } catch (err) {
       setError("Invalid email or password. Please try again.");
     } finally {
@@ -136,6 +166,11 @@ const AuthPage: React.FC = () => {
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
+              </Alert>
+            )}
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
               </Alert>
             )}
             <Box component="form" onSubmit={handleSignIn} sx={{ mt: 1 }}>
@@ -184,6 +219,11 @@ const AuthPage: React.FC = () => {
                 {error}
               </Alert>
             )}
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
             <Box component="form" onSubmit={handleSignUp} sx={{ mt: 1 }}>
               <TextField
                 margin="normal"
@@ -219,6 +259,7 @@ const AuthPage: React.FC = () => {
                 autoComplete="new-password"
                 value={formData.password}
                 onChange={handleChange("password")}
+                helperText="Password must be at least 8 characters long"
               />
               <TextField
                 margin="normal"

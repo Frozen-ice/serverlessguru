@@ -51,12 +51,5 @@ The application supports multi-stage deployments:
 - **Authentication**: AWS Cognito
 - **Infrastructure**: AWS (Lambda, DynamoDB, API Gateway, Cognito)
 
-## Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
 ## License
 MIT License

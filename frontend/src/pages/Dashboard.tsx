@@ -18,6 +18,7 @@ import {
   Person as PersonIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../services/auth";
 import ItemCard from "../components/ItemCard";
 import ItemForm from "../components/ItemForm";
 import { itemsApi } from "../services/api";
@@ -90,7 +91,8 @@ const Dashboard: React.FC = () => {
     setEditingItem(null);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await authService.signOut();
     localStorage.removeItem("cognito_token");
     navigate("/login");
   };
