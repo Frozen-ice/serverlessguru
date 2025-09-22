@@ -85,10 +85,17 @@ npm start
 ```
 
 ### Environment Variables
-Create `.env.local` in the frontend directory:
+The frontend needs to know where to find the deployed backend API. Create `.env.local` in the frontend directory:
+
 ```
-REACT_APP_API_URL=https://your-api-gateway-url.amazonaws.com/dev
+REACT_APP_API_URL=https://oigodm7549.execute-api.us-east-2.amazonaws.com/dev
 ```
+
+**What is REACT_APP_API_URL?**
+- This environment variable tells the React frontend where to send API requests
+- It points to your deployed AWS API Gateway endpoint
+- The React app uses this URL to communicate with the serverless backend
+- Without this, the frontend would try to connect to localhost and fail
 
 ## 🚀 Deployment
 
@@ -151,10 +158,10 @@ npm test
 ### API Testing
 ```bash
 # Get all items
-curl https://your-api-gateway-url.amazonaws.com/dev/api/items
+curl https://oigodm7549.execute-api.us-east-2.amazonaws.com/dev/api/items
 
 # Create item
-curl -X POST https://your-api-gateway-url.amazonaws.com/dev/api/items \
+curl -X POST https://oigodm7549.execute-api.us-east-2.amazonaws.com/dev/api/items \
   -H "Content-Type: application/json" \
   -d '{"name": "Test Item", "description": "Test Description"}'
 ```
@@ -215,7 +222,7 @@ The `serverless.yml` file configures:
 - **API Gateway**: Efficient endpoint design
 - **Monitoring**: Cost tracking and optimization
 
-## 🤝 Contributing
+## �� Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -237,9 +244,9 @@ This project is licensed under the MIT License.
 - Test locally with serverless-offline
 
 **Frontend API Connection Issues**
-- Verify API Gateway URL
+- Verify API Gateway URL in .env.local
 - Check CORS configuration
-- Ensure environment variables are set
+- Ensure environment variables are set correctly
 
 **Authentication Issues**
 - Verify Cognito configuration

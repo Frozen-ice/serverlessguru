@@ -87,7 +87,7 @@ npm test
 curl http://localhost:3000/api/items
 
 # Test deployed
-curl https://your-api-gateway-url.amazonaws.com/dev/api/items
+curl https://oigodm7549.execute-api.us-east-2.amazonaws.com/dev/api/items
 ```
 
 ## Security

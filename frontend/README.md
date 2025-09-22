@@ -69,7 +69,7 @@ src/
 ### Environment Variables
 Create `.env.local`:
 ```
-REACT_APP_API_URL=https://your-api-gateway-url.amazonaws.com/dev
+REACT_APP_API_URL=https://oigodm7549.execute-api.us-east-2.amazonaws.com/dev
 ```
 
 ## Authentication
